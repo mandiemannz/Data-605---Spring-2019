@@ -1,0 +1,132 @@
+---
+title: "Data 605 - HW 1"
+author: "Amanda Arce"
+date: "February 3, 2019"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: monochrome
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+ASSIGNMENT 1
+
+IS 605 FUNDAMENTALS OF COMPUTATIONAL MATHEMATICS - Spring 2019
+
+##1. Problem set 1
+
+You can think of vectors representing many dimensions of related information. For instance, Netflix might store all the ratings a user gives to movies in a vector. This is
+clearly a vector of very large dimensions (in the millions) and very sparse as the user might have rated only a few movies. Similarly, Amazon might store the items purchased by a user in a vector, with each slot or dimension representing a unique product and the value of the slot, the number of such items the user bought. One task that is frequently done in these settings is to find similarities between users. And, we can use dot-product between vectors to do just that. As you know, the dot-product is proportional to the length of two vectors and to the angle between them. In fact, the dot-product between two vectors, normalized by their lengths is called as the cosine distance and is frequently used in recommendation engines.
+
+(1) Calculate the dot product u.v where u = [0.5; 0.5] and v = [3; ???4]
+
+```{r}
+u <- c(0.5, 0.5)
+v <- c(3, -4)
+
+u%*%v
+
+```
+
+(2) What are the lengths of u and v? Please note that the mathematical notion of the
+length of a vector is not the same as a computer science definition.
+
+```{r}
+len.u <- sqrt(.5^2 + .5^2)
+len.u #.7071
+
+len.v <- sqrt(3^2 + (-4)^2)
+len.v #5
+```
+
+
+(3) What is the linear combination: 3u ??? 2v?
+```{r}
+
+linear_c <- (3*u)- (2*v)
+linear_c #(-4.5, 9.5)
+
+```
+
+(4) What is the angle between u and v
+```{r}
+angle.uv = crossprod(u,v)/(len.u*len.v)
+angle.uv <- acos(angle.uv)
+angle.uv #1.712693
+```
+
+
+##2. Problem set 2
+
+Set up a system of equations with 3 variables and 3 constraints and solve for x. Please
+write a function in R that will take two variables (matrix A & constraint vector b) and
+solve using elimination. Your function should produce the right answer for the system of
+equations for any 3-variable, 3-equation system. You don't have to worry about degenerate
+cases and can safely assume that the function will only be tested with a system of equations
+that has a solution. Please note that you do have to worry about zero pivots, though. Please
+note that you should not use the built-in function solve to solve this system or use matrix
+inverses. The approach that you should employ is to construct an Upper Triangular Matrix
+and then back-substitute to get the solution. Alternatively, you can augment the matrix
+A with vector b and jointly apply the Gauss Jordan elimination procedure
+
+Please test it with the system below and it should produce a solution x = [???1.55, ???0.32, 0.95]
+???
+???
+
+```{r}
+function_solve <- function(matrix1, vector1){
+ 
+  #Here I will join the matrix and vector together
+  aug_matrix <- cbind(matrix1, vector1)
+  
+  
+  aug_matrix[2,] <- aug_matrix[2,] - ( aug_matrix[2,1] / aug_matrix[1,1] ) * aug_matrix[1,]
+  aug_matrix[3,] <- aug_matrix[3,] - ( aug_matrix[3,1] / aug_matrix[1,1] ) * aug_matrix[1,]
+  
+  #zero pivot
+  if(aug_matrix[2,2] == 0){
+    if(aug_matrix[3,2] == 0){
+      return(x)
+    }else{
+      temp <- aug_matrix[2,]
+      aug_matrix[2,] <- aug_matrix[3,]
+      aug_matrix[3,] <- temp
+    }
+  }
+
+  aug_matrix[3, ] <- aug_matrix[3, ] - ( aug_matrix[3,2] / aug_matrix[2,2] ) * aug_matrix[2,]
+  
+  
+
+#calculations   
+  
+r <- nrow(aug_matrix)
+c <- ncol(aug_matrix)  
+  
+calc <- c(1:r)
+calc[3] <- aug_matrix[r,c]/aug_matrix[r,c-1]
+calc[2] <- ( aug_matrix[2,4] - aug_matrix[2,3] * calc[3]) / aug_matrix[2,2]
+calc[1] <- ( aug_matrix[1,4] - aug_matrix[1,3] * calc[3] - aug_matrix[1,2] * calc[2]) / aug_matrix[1,1]
+ 
+  return(calc)
+
+}
+
+```
+
+```{r}
+matrix1 <- matrix(c(1,2,-1,1,-1,-2,3,5,4), nrow=3)
+vector1 <- c(1,2,6)
+
+function_solve(matrix1, vector1)
+
+
+#compare to the built in function
+
+solve(matrix1, vector1)
+
+```
